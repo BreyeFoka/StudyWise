@@ -1,11 +1,26 @@
+'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Brain, Zap, Layers } from 'lucide-react'; // Added Layers here
+import { BookOpen, Brain, Layers, Zap } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/auth-context';
+import { Loader2 } from 'lucide-react';
 
 export default function LandingPage() {
+  const { user, loading: authLoading, isFirebaseReady } = useAuth();
+
+  const getStartedLink = () => {
+    if (authLoading || !isFirebaseReady) return "#"; // Or a loading state/disabled button
+    return user ? "/dashboard" : "/login";
+  };
+  
+  const loginLink = () => {
+    if (authLoading || !isFirebaseReady) return "#";
+    return user ? "/dashboard" : "/login"; // If user exists, login button could become "Go to App" or hide
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center border-b">
@@ -13,24 +28,34 @@ export default function LandingPage() {
           <BookOpen className="h-6 w-6 text-primary" />
           <span className="ml-2 text-xl font-semibold">StudyWise</span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
           <Link
-            href="/dashboard"
+            href={getStartedLink()} // Use dynamic link for Features as well if it should point to dashboard
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
             Features
           </Link>
-          <Link
-            href="/dashboard" // Normally this would be /login or /signup
-            className="text-sm font-medium hover:underline underline-offset-4"
-            prefetch={false}
-          >
-            Login
-          </Link>
-          <Button asChild>
-            <Link href="/dashboard">Get Started</Link>
-          </Button>
+           {authLoading || !isFirebaseReady ? (
+             <Loader2 className="h-5 w-5 animate-spin" />
+           ) : user ? (
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">Go to Dashboard</Link>
+              </Button>
+           ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                prefetch={false}
+              >
+                Login
+              </Link>
+              <Button asChild>
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+           )}
         </nav>
       </header>
       <main className="flex-1">
@@ -47,9 +72,10 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button size="lg" asChild>
-                    <Link href="/dashboard">
-                      Go to Dashboard
+                  <Button size="lg" asChild disabled={authLoading || !isFirebaseReady}>
+                    <Link href={getStartedLink()}>
+                      {authLoading || !isFirebaseReady ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                      Get Started
                     </Link>
                   </Button>
                 </div>
