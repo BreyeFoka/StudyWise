@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BarChart, BookOpen, CheckCircle, Clock, FileText, Layers, Edit3, ClipboardCheck, Loader2, AlertTriangle } from "lucide-react";
+import { BarChart, BookOpen, Calendar, CheckCircle, Clock, FileText, Layers, Edit3, ClipboardCheck, Loader2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/auth-context';
 import { getFlashcards, getAllDecks, type Flashcard } from '@/services/flashcard-service';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 // import type { Metadata } from 'next'; // Metadata should be in layout or server component
 
 // export const metadata: Metadata = {
@@ -56,20 +57,30 @@ export default function DashboardPage() {
 
           const today = new Date();
           today.setHours(0,0,0,0);
-          const dueCards = allUserFlashcards.filter(fc => new Date(fc.dueDate) <= today);
+          const dueCards = allUserFlashcards.filter(fc => {
+            // Ensure fc.dueDate is a Date object before comparison
+            const dueDate = fc.dueDate instanceof Date ? fc.dueDate : new Date(fc.dueDate);
+            return dueDate <= today;
+          });
           setDueFlashcardsCount(dueCards.length);
 
           // Mock recent activities based on flashcards for now
           const newRecentActivities: RecentActivity[] = [];
           if (allUserFlashcards.length > 0) {
             // Get the 3 most recently created flashcards to simulate activity
-            const sortedByCreation = [...allUserFlashcards].sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+            const sortedByCreation = [...allUserFlashcards].sort((a, b) => {
+                const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (typeof a.createdAt === 'string' || typeof a.createdAt === 'number' ? new Date(a.createdAt).getTime() : 0);
+                const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (typeof b.createdAt === 'string' || typeof b.createdAt === 'number' ? new Date(b.createdAt).getTime() : 0);
+                return dateB - dateA;
+            });
             
             if (sortedByCreation.length > 0 && sortedByCreation[0].createdAt) {
+                 const firstCardCreatedAt = sortedByCreation[0].createdAt instanceof Date ? sortedByCreation[0].createdAt : new Date(sortedByCreation[0].createdAt);
+                 const hoursAgo = Math.floor((new Date().getTime() - firstCardCreatedAt.getTime()) / (1000*60*60));
                  newRecentActivities.push({
                     icon: <Layers className="h-6 w-6 text-primary" />,
                     title: `Created flashcard deck: "${sortedByCreation[0].deck}"`,
-                    time: `About ${Math.floor((new Date().getTime() - sortedByCreation[0].createdAt.getTime()) / (1000*60*60))} hours ago`,
+                    time: `About ${hoursAgo} hour${hoursAgo === 1 ? '' : 's'} ago`,
                     alt: "Flashcards Icon",
                     href: "/flashcards"
                  });
@@ -84,10 +95,13 @@ export default function DashboardPage() {
                  });
             }
              if (allUserFlashcards.length > 3 && sortedByCreation[1]?.createdAt) {
+                 const secondCardCreatedAt = sortedByCreation[1].createdAt instanceof Date ? sortedByCreation[1].createdAt : new Date(sortedByCreation[1].createdAt);
+                 const daysAgo = Math.floor((new Date().getTime() - secondCardCreatedAt.getTime()) / (1000*60*60*24));
+
                  newRecentActivities.push({
                     icon: <FileText className="h-6 w-6 text-primary" />,
                     title: `Added ${Math.floor(Math.random()*5+1)} cards to "${sortedByCreation[1].deck}"`,
-                    time: `About ${Math.floor((new Date().getTime() - sortedByCreation[1].createdAt.getTime()) / (1000*60*60*24))} days ago`,
+                    time: `About ${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`,
                     alt: "Notes Icon",
                     href: "/flashcards"
                  });
