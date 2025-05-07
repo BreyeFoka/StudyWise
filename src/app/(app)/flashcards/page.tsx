@@ -1,13 +1,27 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, Check, Info, PlusCircle, RefreshCw, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Info, PlusCircle, RefreshCw, BookOpen, Edit, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
-// import type { Metadata } from 'next'; // Cannot be used in client component
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from '@/hooks/use-toast';
+
 
 interface Flashcard {
   id: string;
@@ -42,9 +56,22 @@ export default function FlashcardsPage() {
   const [sessionTotalDueCards, setSessionTotalDueCards] = useState(0);
   const [answeredCardIdsInSession, setAnsweredCardIdsInSession] = useState<Set<string>>(new Set());
 
+  // State for Add/Edit Flashcard Modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newCardQuestion, setNewCardQuestion] = useState('');
+  const [newCardAnswer, setNewCardAnswer] = useState('');
+  const [newCardDeck, setNewCardDeck] = useState(''); // Can be existing or new deck name
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
+
+
+  const { toast } = useToast();
+
   useEffect(() => {
     setIsClient(true);
+    document.title = 'Flashcards - StudyWise';
   }, []);
+
+  const allDecks = useMemo(() => Array.from(new Set(allFlashcards.map(fc => fc.deck))).sort(), [allFlashcards]);
 
   // Effect to determine and set up the current review session
   useEffect(() => {
@@ -57,12 +84,16 @@ export default function FlashcardsPage() {
       if (activeDeckFilter) {
         cardsToReviewQuery = cardsToReviewQuery.filter(card => card.deck === activeDeckFilter);
       }
+      
+      // Shuffle cards to review for variety
+      cardsToReviewQuery.sort(() => Math.random() - 0.5);
 
       setDueFlashcards(cardsToReviewQuery);
       setSessionTotalDueCards(cardsToReviewQuery.length); // Total for this session
       setCurrentCardIndex(0); // Start from the first card of the new set
       setAnsweredCardIdsInSession(new Set()); // Reset session tracking
       setSessionProgress(0); // Reset progress
+      setShowAnswer(false); // Hide answer for new card
     }
   }, [allFlashcards, isClient, activeDeckFilter]);
 
@@ -71,6 +102,70 @@ export default function FlashcardsPage() {
   const handleShowAnswer = () => {
     setShowAnswer(true);
   };
+
+  const handleSaveFlashcard = () => {
+    if (!newCardQuestion.trim() || !newCardAnswer.trim() || !newCardDeck.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in question, answer, and deck name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingFlashcard) {
+      // Update existing flashcard
+      const updatedCards = allFlashcards.map(fc => 
+        fc.id === editingFlashcard.id 
+        ? { ...fc, question: newCardQuestion, answer: newCardAnswer, deck: newCardDeck.trim() } 
+        : fc
+      );
+      setAllFlashcards(updatedCards);
+      toast({ title: "Flashcard Updated", description: "Your flashcard has been successfully updated." });
+    } else {
+      // Add new flashcard
+      const newFlashcard: Flashcard = {
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        question: newCardQuestion.trim(),
+        answer: newCardAnswer.trim(),
+        deck: newCardDeck.trim(),
+        dueDate: new Date(), // Due immediately for first review
+        interval: 1,
+        easeFactor: 2.5, // Standard starting EF
+      };
+      setAllFlashcards(prev => [...prev, newFlashcard]);
+      toast({ title: "Flashcard Created", description: "New flashcard added to your collection." });
+    }
+    
+    // Reset form and close modal
+    setNewCardQuestion('');
+    setNewCardAnswer('');
+    setNewCardDeck('');
+    setEditingFlashcard(null);
+    setIsCreateModalOpen(false);
+  };
+
+  const handleOpenCreateModal = (cardToEdit: Flashcard | null = null) => {
+    if (cardToEdit) {
+      setEditingFlashcard(cardToEdit);
+      setNewCardQuestion(cardToEdit.question);
+      setNewCardAnswer(cardToEdit.answer);
+      setNewCardDeck(cardToEdit.deck);
+    } else {
+      setEditingFlashcard(null);
+      setNewCardQuestion('');
+      setNewCardAnswer('');
+      setNewCardDeck(''); // Default to empty or last used deck
+    }
+    setIsCreateModalOpen(true);
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    // Add a confirmation dialog here in a real app
+    setAllFlashcards(prev => prev.filter(fc => fc.id !== cardId));
+    toast({ title: "Flashcard Deleted", description: "The flashcard has been removed.", variant: "destructive" });
+  };
+
 
   const handleNextCard = (quality: number) => { // SM2 quality: 0 (no idea) to 5 (perfect recall)
     if (!currentCard) return;
@@ -111,11 +206,8 @@ export default function FlashcardsPage() {
     }
 
     setShowAnswer(false);
-    // Instead of manually advancing index, let the useEffect triggered by setAllFlashcards handle it.
-    // This ensures `dueFlashcards` is always fresh.
-    // If currentCardIndex was the last one, and it's now handled, useEffect will set new dueFlashcards.
-    // If it becomes empty, currentCard will be null. If not, currentCardIndex will be 0 for the new set.
     setAllFlashcards(updatedFlashcards);
+    // Let useEffect handle moving to the next card or finishing the session
   };
 
   const handleStudyDeck = (deckName: string) => {
@@ -136,7 +228,6 @@ export default function FlashcardsPage() {
     );
   }
 
-  const allDecks = Array.from(new Set(allFlashcards.map(fc => fc.deck)));
 
   return (
     <div className="container mx-auto py-8">
@@ -154,20 +245,91 @@ export default function FlashcardsPage() {
               <RefreshCw className="mr-2 h-4 w-4" /> Study All Due
             </Button>
           )}
-          <Button variant="outline"> {/* TODO: Implement Create New Deck Modal */}
-            <PlusCircle className="mr-2 h-4 w-4" /> Create New Deck
+           <Button variant="default" onClick={() => handleOpenCreateModal()}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Flashcard
           </Button>
         </div>
       </div>
+
+      {/* Add/Edit Flashcard Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{editingFlashcard ? 'Edit Flashcard' : 'Create New Flashcard'}</DialogTitle>
+            <DialogDescription>
+              {editingFlashcard ? 'Modify the details of your flashcard.' : 'Add a new question and answer to your collection.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="question" className="text-right">
+                Question
+              </Label>
+              <Textarea
+                id="question"
+                value={newCardQuestion}
+                onChange={(e) => setNewCardQuestion(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter the question"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="answer" className="text-right">
+                Answer
+              </Label>
+              <Textarea
+                id="answer"
+                value={newCardAnswer}
+                onChange={(e) => setNewCardAnswer(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter the answer"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="deck" className="text-right">
+                Deck
+              </Label>
+              <Input
+                id="deck"
+                value={newCardDeck}
+                onChange={(e) => setNewCardDeck(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter deck name (e.g., Biology)"
+                list="deck-suggestions"
+              />
+              <datalist id="deck-suggestions">
+                {allDecks.map(deck => <option key={deck} value={deck} />)}
+              </datalist>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleSaveFlashcard}>{editingFlashcard ? 'Save Changes' : 'Create Flashcard'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {currentCard ? (
         <Card className="max-w-2xl mx-auto shadow-xl">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>{currentCard.deck}</CardTitle>
-              <CardDescription>
-                {answeredCardIdsInSession.size + 1} / {sessionTotalDueCards} in this session
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                 <Button variant="ghost" size="icon" onClick={() => handleOpenCreateModal(currentCard)} title="Edit this card">
+                    <Edit className="h-4 w-4" />
+                 </Button>
+                 <Button variant="ghost" size="icon" onClick={() => handleDeleteCard(currentCard.id)} title="Delete this card" className="text-destructive hover:text-destructive/80">
+                    <Trash2 className="h-4 w-4" />
+                 </Button>
+                <CardDescription>
+                  {answeredCardIdsInSession.size + 1} / {sessionTotalDueCards}
+                </CardDescription>
+              </div>
             </div>
             <Progress value={sessionProgress} className="mt-2" aria-label={`${Math.round(sessionProgress)}% of session complete`} />
           </CardHeader>
@@ -197,15 +359,15 @@ export default function FlashcardsPage() {
         <Card className="text-center py-10 shadow-xl">
            <CardHeader>
             <CardTitle className="flex items-center justify-center gap-2 text-2xl">
-                <Check className="h-8 w-8 text-accent" /> 
+                <Check className="h-8 w-8 text-green-500" /> {/* Changed to green */}
                 {activeDeckFilter ? `All caught up on ${activeDeckFilter}!` : "All Caught Up!"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-6">
               {sessionTotalDueCards > 0 && answeredCardIdsInSession.size === sessionTotalDueCards 
-                ? `You've reviewed all ${sessionTotalDueCards} cards for this session.`
-                : "You have no flashcards due for review right now."}
+                ? `You've reviewed all ${sessionTotalDueCards} cards for this ${activeDeckFilter ? `deck's ` : ''}session.`
+                : `You have no flashcards due for review in ${activeDeckFilter ? activeDeckFilter : 'any deck'} right now.`}
             </p>
             <Image 
                 data-ai-hint="celebration study" 
@@ -220,6 +382,9 @@ export default function FlashcardsPage() {
                     Review Other Due Cards
                 </Button>
             )}
+             {!activeDeckFilter && allFlashcards.length > 0 && dueFlashcards.length === 0 && (
+                <p className="mt-4 text-muted-foreground">Check back later for more cards to review!</p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -231,7 +396,7 @@ export default function FlashcardsPage() {
             {allDecks.map(deckName => {
               const cardsInDeck = allFlashcards.filter(fc => fc.deck === deckName);
               const today = new Date(); today.setHours(0,0,0,0);
-              const dueInDeckCount = allFlashcards.filter(fc => fc.deck === deckName && new Date(fc.dueDate) <= today).length;
+              const dueInDeckCount = cardsInDeck.filter(fc => new Date(fc.dueDate) <= today).length;
               return (
                 <Card key={deckName} className="shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
@@ -243,7 +408,7 @@ export default function FlashcardsPage() {
                   <CardContent>
                     <p>{cardsInDeck.length} card{cardsInDeck.length === 1 ? '' : 's'} total</p>
                     <p className={dueInDeckCount > 0 ? "text-accent font-semibold" : "text-muted-foreground"}>
-                      {dueInDeckCount} card{dueInDeckCount === 1 ? '' : 's'} due
+                      {dueInDeckCount > 0 ? `${dueInDeckCount} card${dueInDeckCount === 1 ? '' : 's'} due` : "No cards due"}
                     </p>
                   </CardContent>
                   <CardFooter>
@@ -251,7 +416,7 @@ export default function FlashcardsPage() {
                       variant="outline" 
                       className="w-full" 
                       onClick={() => handleStudyDeck(deckName)}
-                      disabled={activeDeckFilter === deckName}
+                      disabled={activeDeckFilter === deckName && dueFlashcards.length > 0} // Disable if currently studying this deck and cards are loaded
                     >
                       Study {deckName} Deck
                     </Button>
@@ -261,7 +426,13 @@ export default function FlashcardsPage() {
             })}
           </div>
         ) : (
-            <p className="text-muted-foreground">No flashcard decks available. Try creating one!</p>
+            <div className="text-center py-10 border-2 border-dashed rounded-lg">
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg mb-2">No flashcard decks yet.</p>
+                <Button onClick={() => handleOpenCreateModal()}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Flashcard
+                </Button>
+            </div>
         )}
       </div>
     </div>
