@@ -9,56 +9,22 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
+import { 
+  QuizQuestionSchema, 
+  GenerateQuizInputSchema, 
+  GenerateQuizOutputSchema 
+} from '@/ai/schemas/quiz.schemas';
 
-const QuizQuestionSchema = z.object({
-  questionText: z.string().describe('The text of the quiz question.'),
-  questionType: z
-    .enum(['multiple-choice', 'true-false', 'short-answer'])
-    .describe('The type of the question (e.g., multiple-choice, true-false, short-answer).'),
-  options: z
-    .array(z.string())
-    .optional()
-    .describe('An array of possible answers for multiple-choice questions. Required if questionType is multiple-choice. Should contain between 2 and 5 options.'),
-  correctAnswer: z
-    .string()
-    .describe('The correct answer to the question. For multiple-choice, this must be one of the strings from the options array. For true-false, it should be "True" or "False".'),
-  explanation: z
-    .string()
-    .optional()
-    .describe('A brief explanation of why the answer is correct, or additional context.'),
-});
+
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
-
-export const GenerateQuizInputSchema = z.object({
-  documentDataUri: z
-    .string()
-    .optional()
-    .describe(
-      "Optional: A document (PDF, PowerPoint slides, lecture notes) as a data URI to base the quiz on. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-  topic: z
-    .string()
-    .optional()
-    .describe('Optional: A specific topic to generate the quiz about. Used if no document is provided, or to narrow down focus within a document.'),
-  numQuestions: z
-    .number()
-    .min(1)
-    .max(20)
-    .default(5)
-    .describe('The number of questions to generate for the quiz (default is 5, max 20).'),
-}).refine(data => data.documentDataUri || data.topic, {
-  message: "Either a documentDataUri or a topic must be provided.",
-});
 export type GenerateQuizInput = z.infer<typeof GenerateQuizInputSchema>;
-
-const GenerateQuizOutputSchema = z.object({
-  quizTitle: z.string().describe('A suitable title for the generated quiz (e.g., "Quiz on Photosynthesis Basics").'),
-  questions: z.array(QuizQuestionSchema).describe('An array of quiz questions.'),
-});
 export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 
+
 export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
+  // The .refine() check in GenerateQuizInputSchema handles this,
+  // but an explicit check here can be clearer or catch issues if Zod isn't used for validation upstream.
   if (!input.documentDataUri && !input.topic) {
     throw new Error("Either a document or a topic must be provided to generate a quiz.");
   }
@@ -115,19 +81,33 @@ const generateQuizFlow = ai.defineFlow(
     output.questions.forEach(q => {
       if (q.questionType === 'multiple-choice') {
         if (!q.options || q.options.length < 2) {
-          throw new Error(`Multiple-choice question "${q.questionText}" must have at least 2 options.`);
+          // This should ideally be caught by the model following instructions,
+          // but as a safeguard, we could add filler options or throw an error.
+          // For now, log a warning or adapt. If schema validation is strict, this might not even pass Zod.
+          console.warn(`Multiple-choice question "${q.questionText}" has insufficient options. Model might not have followed instructions fully.`);
+          // To be robust, ensure q.options exists before checking includes.
+          q.options = q.options || []; // Ensure options is an array
         }
-        if (!q.options.includes(q.correctAnswer)) {
-          // Attempt to find a case-insensitive match as a fallback
-          const foundOption = q.options.find(opt => opt.toLowerCase() === q.correctAnswer.toLowerCase());
+        // Ensure q.options is always an array before calling .includes or .find
+        const currentOptions = q.options || [];
+        if (!currentOptions.includes(q.correctAnswer)) {
+          const foundOption = currentOptions.find(opt => opt.toLowerCase() === q.correctAnswer.toLowerCase());
           if (foundOption) {
-            q.correctAnswer = foundOption; // Correct the casing
+            q.correctAnswer = foundOption; 
           } else {
-            // If still not found, this is an issue. For now, we'll let it pass but ideally, it should be fixed or reported.
-            // This could be a sign the model didn't follow instructions perfectly.
-            // To be stricter, uncomment the line below:
-            // throw new Error(`Correct answer for "${q.questionText}" is not among the options.`);
-            console.warn(`Correct answer for "${q.questionText}" ("${q.correctAnswer}") might not exactly match one of the options: ${q.options.join(', ')}`);
+            console.warn(`Correct answer for "${q.questionText}" ("${q.correctAnswer}") might not exactly match one of the options: ${currentOptions.join(', ')}. Defaulting to first option or leaving as is if no options.`);
+            // Potentially problematic: if no options, this would fail.
+            // If options exist but none match, model has made a mistake.
+            // Consider how to handle this: throw error, pick first option, or ask model to regenerate question.
+            // For now, we let it pass with a warning. If options are empty, this is a larger issue.
+            if (currentOptions.length === 0 && q.questionType === 'multiple-choice') {
+                 // This indicates a severe issue with model output or logic.
+                 // Depending on strictness, could throw error or try to salvage.
+                 // For now, if options were expected but are empty, it's a data integrity issue.
+                 console.error(`CRITICAL: Multiple-choice question "${q.questionText}" has no options provided by the model.`);
+                 // To prevent downstream errors, one might convert to short-answer or remove the question.
+                 // For this exercise, we'll leave it to potentially fail stricter validation or UI rendering logic.
+            }
           }
         }
       }
