@@ -1,10 +1,11 @@
+
 'use client';
 
 import type { User as FirebaseUser, AuthError } from 'firebase/auth';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase/client';
+import { auth as authInstance, firebaseInitializationError } from '@/lib/firebase/client'; // Renamed to authInstance
 import { isFirebaseConfigured } from '@/lib/firebase/config';
 import type { z } from 'zod';
 import type { LoginSchema } from '@/app/(auth)/login/page';
@@ -14,9 +15,10 @@ interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
   signInWithEmail: (data: z.infer<typeof LoginSchema>) => Promise<FirebaseUser>;
-  signUpWithEmail: (data: z.infer<typeof SignUpSchema>) => Promise<FirebaseUser>;
+  signUpWithEmail: (data: z.infer<typeof SignUpSchema>, displayName?: string) => Promise<FirebaseUser>;
   signOutUser: () => Promise<void>;
-  isFirebaseReady: boolean;
+  isFirebaseReady: boolean; // True if config is present AND initialization was successful
+  auth: Auth | undefined; // Expose the auth instance
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,10 +29,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isFirebaseReady, setIsFirebaseReady] = useState(false);
 
   useEffect(() => {
-    if (isFirebaseConfigured()) {
+    if (isFirebaseConfigured() && authInstance && !firebaseInitializationError) {
       setIsFirebaseReady(true);
       const unsubscribe = onAuthStateChanged(
-        auth,
+        authInstance,
         (currentUser) => {
           setUser(currentUser);
           setLoading(false);
@@ -46,29 +48,38 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setIsFirebaseReady(false);
       setUser(null);
       setLoading(false);
+      if (firebaseInitializationError) {
+        console.error("Firebase AuthProvider: Initialization error detected.", firebaseInitializationError);
+      } else if (!isFirebaseConfigured()) {
+        console.warn("Firebase AuthProvider: Firebase is not configured.");
+      } else if (!authInstance) {
+        console.warn("Firebase AuthProvider: Auth instance is not available after configuration check.");
+      }
     }
   }, []);
 
   const signInWithEmail = async (data: z.infer<typeof LoginSchema>): Promise<FirebaseUser> => {
-    if (!isFirebaseReady) throw new Error("Firebase not configured for sign in.");
-    const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+    if (!isFirebaseReady || !authInstance) throw new Error("Firebase Auth is not available for sign in.");
+    const userCredential = await signInWithEmailAndPassword(authInstance, data.email, data.password);
     return userCredential.user;
   };
 
-  const signUpWithEmail = async (data: z.infer<typeof SignUpSchema>): Promise<FirebaseUser> => {
-    if (!isFirebaseReady) throw new Error("Firebase not configured for sign up.");
-    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-    // Optionally update profile here if name is collected: await updateProfile(userCredential.user, { displayName: data.name });
+  const signUpWithEmail = async (data: z.infer<typeof SignUpSchema>, displayName?: string): Promise<FirebaseUser> => {
+    if (!isFirebaseReady || !authInstance) throw new Error("Firebase Auth is not available for sign up.");
+    const userCredential = await createUserWithEmailAndPassword(authInstance, data.email, data.password);
+    if (displayName && userCredential.user) {
+      await updateProfile(userCredential.user, { displayName });
+    }
     return userCredential.user;
   };
 
   const signOutUser = async (): Promise<void> => {
-    if (!isFirebaseReady) throw new Error("Firebase not configured for sign out.");
-    await signOut(auth);
+    if (!isFirebaseReady || !authInstance) throw new Error("Firebase Auth is not available for sign out.");
+    await signOut(authInstance);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail, signOutUser, isFirebaseReady }}>
+    <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail, signOutUser, isFirebaseReady, auth: authInstance }}>
       {children}
     </AuthContext.Provider>
   );

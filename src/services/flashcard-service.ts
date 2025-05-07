@@ -1,9 +1,11 @@
+
 'use server';
 /**
  * @fileOverview Service functions for managing flashcards in Firestore.
  */
 
-import { db } from '@/lib/firebase/client';
+import { db as firestoreDb, firebaseInitializationError } from '@/lib/firebase/client';
+import type { Firestore } from 'firebase/firestore';
 import {
   collection,
   addDoc,
@@ -48,6 +50,19 @@ interface FlashcardDocument {
   userId: string;
 }
 
+// Helper function to ensure Firestore is initialized
+function ensureDbInitialized(): Firestore {
+  if (firebaseInitializationError) {
+    throw new Error(`Firebase initialization failed: ${firebaseInitializationError.message}. Database operations are not available.`);
+  }
+  if (!firestoreDb) {
+    // This case implies Firebase is not configured or db instance is not available for other reasons.
+    throw new Error("Firestore is not initialized. Check Firebase configuration. Database operations are not available.");
+  }
+  return firestoreDb;
+}
+
+
 function flashcardFromDoc(docSnapshot: any): Flashcard {
   const data = docSnapshot.data() as FlashcardDocument;
   return {
@@ -65,6 +80,7 @@ function flashcardFromDoc(docSnapshot: any): Flashcard {
 
 
 export async function addFlashcard(userId: string, cardData: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  const db = ensureDbInitialized();
   if (!userId) throw new Error("User ID is required to add a flashcard.");
   try {
     const flashcardsCol = collection(db, `users/${userId}/flashcards`);
@@ -73,7 +89,7 @@ export async function addFlashcard(userId: string, cardData: Omit<Flashcard, 'id
       dueDate: Timestamp.fromDate(cardData.dueDate),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      userId: userId, // Storing userId for potential broader queries if rules change
+      userId: userId, 
     });
     return docRef.id;
   } catch (error) {
@@ -83,6 +99,7 @@ export async function addFlashcard(userId: string, cardData: Omit<Flashcard, 'id
 }
 
 export async function addMultipleFlashcards(userId: string, deckName: string, aiFlashcards: AIFlashcardItem[]): Promise<string[]> {
+  const db = ensureDbInitialized();
   if (!userId) throw new Error("User ID is required to add flashcards.");
   if (!deckName) throw new Error("Deck name is required.");
   if (!aiFlashcards || aiFlashcards.length === 0) return [];
@@ -92,13 +109,13 @@ export async function addMultipleFlashcards(userId: string, deckName: string, ai
   const newIds: string[] = [];
 
   aiFlashcards.forEach(item => {
-    const newDocRef = doc(flashcardsCol); // Create a new doc reference to get ID upfront
+    const newDocRef = doc(flashcardsCol); 
     newIds.push(newDocRef.id);
     batch.set(newDocRef, {
       question: item.question,
       answer: item.answer,
       deck: deckName,
-      dueDate: Timestamp.fromDate(new Date()), // Due immediately
+      dueDate: Timestamp.fromDate(new Date()), 
       interval: 1,
       easeFactor: 2.5,
       createdAt: serverTimestamp(),
@@ -118,6 +135,7 @@ export async function addMultipleFlashcards(userId: string, deckName: string, ai
 
 
 export async function updateFlashcard(userId: string, flashcardId: string, updates: Partial<Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+  const db = ensureDbInitialized();
   if (!userId) throw new Error("User ID is required.");
   if (!flashcardId) throw new Error("Flashcard ID is required.");
   try {
@@ -134,6 +152,7 @@ export async function updateFlashcard(userId: string, flashcardId: string, updat
 }
 
 export async function deleteFlashcard(userId: string, flashcardId: string): Promise<void> {
+  const db = ensureDbInitialized();
   if (!userId) throw new Error("User ID is required.");
   if (!flashcardId) throw new Error("Flashcard ID is required.");
   try {
@@ -146,25 +165,25 @@ export async function deleteFlashcard(userId: string, flashcardId: string): Prom
 }
 
 export async function getFlashcards(userId: string): Promise<Flashcard[]> {
+  const db = ensureDbInitialized();
   if (!userId) return [];
   try {
     const flashcardsCol = collection(db, `users/${userId}/flashcards`);
-    // Consider ordering, e.g., by createdAt or deck name
     const q = query(flashcardsCol, orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(flashcardFromDoc);
   } catch (error) {
     console.error("Error fetching flashcards from Firestore: ", error);
-    // Gracefully return empty or throw, depending on desired UX
     return []; 
   }
 }
 
 export async function getDueFlashcards(userId: string, deckName?: string | null): Promise<Flashcard[]> {
+  const db = ensureDbInitialized();
   if (!userId) return [];
   try {
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Ensure we get all cards due up to end of today
+    today.setHours(23, 59, 59, 999); 
 
     let q = query(
       collection(db, `users/${userId}/flashcards`),
@@ -174,7 +193,6 @@ export async function getDueFlashcards(userId: string, deckName?: string | null)
     if (deckName) {
       q = query(q, where("deck", "==", deckName));
     }
-    // Order by dueDate to review earliest due cards first
     q = query(q, orderBy("dueDate", "asc"));
 
     const snapshot = await getDocs(q);
@@ -187,8 +205,10 @@ export async function getDueFlashcards(userId: string, deckName?: string | null)
 
 
 export async function getAllDecks(userId: string): Promise<string[]> {
+  const db = ensureDbInitialized();
   if (!userId) return [];
   try {
+    // This re-uses getFlashcards, which already ensures DB is initialized
     const flashcards = await getFlashcards(userId);
     const deckNames = new Set(flashcards.map(fc => fc.deck));
     return Array.from(deckNames).sort();

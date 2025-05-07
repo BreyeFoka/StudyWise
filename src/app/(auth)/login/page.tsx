@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +23,7 @@ export const LoginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { signInWithEmail, user, loading: authLoading, isFirebaseReady } = useAuth();
+  const { signInWithEmail, user, loading: authLoading, isFirebaseReady, auth } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -45,6 +46,16 @@ export default function LoginPage() {
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setIsSubmitting(true);
+    if (!isFirebaseReady || !auth) { // Check if auth instance is available
+      toast({
+        title: 'Login Unavailable',
+        description: 'Firebase authentication service is not ready. Please try again later or contact support if the issue persists.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await signInWithEmail(values);
       toast({ title: 'Login Successful', description: "Welcome back! You're now logged in." });
@@ -89,14 +100,14 @@ export default function LoginPage() {
     );
   }
   
-  if (!isFirebaseReady && !authLoading) {
+  if (!isFirebaseReady && !authLoading && !auth) { // Check if auth instance is also not available
     return (
        <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
            <Link href="/" className="mb-4"><Logo /></Link>
           <CardTitle className="text-2xl">Login Unavailable</CardTitle>
           <CardDescription>
-            Firebase is not configured. Please provide Firebase environment variables.
+            Firebase authentication is not configured or failed to initialize. Please check environment variables or contact support.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -140,7 +151,7 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting || !isFirebaseReady || !auth}>
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
