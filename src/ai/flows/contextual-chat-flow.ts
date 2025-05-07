@@ -12,20 +12,20 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import type { MessageData } from 'genkit'; 
 
-export const ChatMessageSchema = z.object({
+const ChatMessageSchema = z.object({
   role: z.enum(['user', 'model']),
   parts: z.array(z.object({ text: z.string() })),
 });
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
-export const ContextualChatInputSchema = z.object({
+const ContextualChatInputSchema = z.object({
   currentMessage: z.string().describe('The latest message from the user.'),
   chatHistory: z.array(ChatMessageSchema).optional().describe('The history of the conversation so far.'),
   // documentContext: z.string().optional().describe('Contextual information from relevant documents.'), // Future enhancement
 });
 export type ContextualChatInput = z.infer<typeof ContextualChatInputSchema>;
 
-export const ContextualChatOutputSchema = z.object({
+const ContextualChatOutputSchema = z.object({
   responseText: z.string().describe('The AI-generated response to the user.'),
 });
 export type ContextualChatOutput = z.infer<typeof ContextualChatOutputSchema>;
@@ -64,7 +64,7 @@ const contextualChatFlow = ai.defineFlow(
       // config: { temperature: 0.7 }, // Optional: Adjust creativity
     });
 
-    const responseText = llmResponse.text();
+    const responseText = llmResponse.text; // Corrected: Access text property directly
     
     if (!responseText) {
       // This might happen if the model's safety settings block the response or an error occurs.
@@ -73,3 +73,4 @@ const contextualChatFlow = ai.defineFlow(
     return { responseText };
   }
 );
+
