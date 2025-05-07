@@ -1,6 +1,7 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Brain, Zap } from 'lucide-react';
+import { BookOpen, Brain, Zap, Layers } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
