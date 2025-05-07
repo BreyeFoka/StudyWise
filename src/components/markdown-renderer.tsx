@@ -1,3 +1,4 @@
+
 'use client';
 
 import ReactMarkdown, { type Options } from 'react-markdown';
@@ -5,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Choose a style
+import dracula from 'react-syntax-highlighter/dist/esm/styles/prism/dracula'; // Choose a style
 
 interface MarkdownRendererProps {
   content: string;
