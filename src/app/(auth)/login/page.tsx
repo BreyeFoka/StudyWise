@@ -63,8 +63,11 @@ export default function LoginPage() {
           case 'auth/invalid-email':
             errorMessage = 'Invalid email format.';
             break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'Firebase authentication is not configured for this project. Please ensure Email/Password sign-in is enabled in the Firebase console.';
+            break;
           default:
-            errorMessage = 'Login failed. Please try again.';
+            errorMessage = `Login failed: ${authError.message}. Please try again. (Code: ${authError.code})`;
         }
       }
       toast({
@@ -93,7 +96,7 @@ export default function LoginPage() {
            <Link href="/" className="mb-4"><Logo /></Link>
           <CardTitle className="text-2xl">Login Unavailable</CardTitle>
           <CardDescription>
-            Firebase is not configured. Please contact support.
+            Firebase is not configured. Please provide Firebase environment variables.
           </CardDescription>
         </CardHeader>
       </Card>

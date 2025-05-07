@@ -36,13 +36,13 @@ export default function LandingPage() {
           >
             Features
           </Link>
-           {authLoading || !isFirebaseReady ? (
+           {/* {authLoading || !isFirebaseReady ? (
              <Loader2 className="h-5 w-5 animate-spin" />
-           ) : user ? (
+           ) : !user ? ( */}
               <Button variant="outline" asChild>
                 <Link href="/dashboard">Go to Dashboard</Link>
               </Button>
-           ) : (
+           {/* ) : (
             <>
               <Link
                 href="/login"
@@ -55,7 +55,7 @@ export default function LandingPage() {
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </>
-           )}
+           )} */}
         </nav>
       </header>
       <main className="flex-1">

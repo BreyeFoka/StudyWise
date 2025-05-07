@@ -66,8 +66,11 @@ export default function SignUpPage() {
           case 'auth/weak-password':
             errorMessage = 'Password is too weak. Please choose a stronger password.';
             break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'Firebase authentication is not configured for this project. Please ensure Email/Password sign-in is enabled in the Firebase console.';
+            break;
           default:
-            errorMessage = 'Sign up failed. Please try again.';
+            errorMessage = `Sign up failed: ${authError.message}. Please try again. (Code: ${authError.code})`;
         }
       }
       toast({
@@ -96,7 +99,7 @@ export default function SignUpPage() {
            <Link href="/" className="mb-4"><Logo /></Link>
           <CardTitle className="text-2xl">Sign Up Unavailable</CardTitle>
           <CardDescription>
-            Firebase is not configured. Please contact support.
+           Firebase is not configured. Please provide Firebase environment variables.
           </CardDescription>
         </CardHeader>
       </Card>
