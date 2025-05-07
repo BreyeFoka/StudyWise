@@ -51,6 +51,9 @@ const homeworkHelpFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+     if (!output || !output.explanation) {
+      throw new Error("Failed to generate explanation. The AI model did not return the expected output or the explanation was empty.");
+    }
+    return output;
   }
 );

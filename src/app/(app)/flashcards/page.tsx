@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react';
 import { useState, useEffect, useMemo, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Info, PlusCircle, RefreshCw, BookOpen, Edit, Trash2, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import { Check, Info, PlusCircle, RefreshCw, BookOpen, Edit, Trash2, Sparkles, Loader2, AlertTriangle, CalendarIcon } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
 import {
@@ -33,6 +33,7 @@ import {
   getAllDecks,
   type Flashcard 
 } from '@/services/flashcard-service';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 // Flashcard interface is now imported from flashcard-service
@@ -84,7 +85,8 @@ export default function FlashcardsPage() {
         })
         .catch(error => {
           console.error("Failed to load flashcards:", error);
-          toast({ title: "Error", description: "Could not load your flashcards.", variant: "destructive" });
+          const errorMessage = error instanceof Error ? error.message : "Could not load your flashcards.";
+          toast({ title: "Error Loading Flashcards", description: errorMessage, variant: "destructive" });
         })
         .finally(() => setIsLoadingFlashcards(false));
     } else if (!authLoading && !user && isFirebaseReady) {
@@ -269,7 +271,8 @@ export default function FlashcardsPage() {
 
         } catch (error) {
             console.error("Error updating flashcard after review:", error);
-            toast({ title: "Review Error", description: "Could not save review progress.", variant: "destructive" });
+            const errorMessage = error instanceof Error ? error.message : "Could not save review progress.";
+            toast({ title: "Review Error", description: errorMessage, variant: "destructive" });
         }
     });
   };

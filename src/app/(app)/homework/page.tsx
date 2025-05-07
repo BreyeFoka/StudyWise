@@ -60,9 +60,10 @@ export default function HomeworkHelperPage() {
         });
       } catch (error) {
         console.error('Error getting homework help:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get an explanation. Please try again.';
         toast({
           title: 'Error',
-          description: 'Failed to get an explanation. Please try again.',
+          description: errorMessage,
           variant: 'destructive',
         });
         setExplanation(null);

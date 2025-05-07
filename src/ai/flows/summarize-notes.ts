@@ -46,6 +46,9 @@ const summarizeNotesFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output || !output.summary) {
+      throw new Error("Failed to generate summary. The AI model did not return the expected output or the summary was empty.");
+    }
+    return output;
   }
 );

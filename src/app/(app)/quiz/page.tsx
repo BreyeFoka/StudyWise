@@ -78,9 +78,10 @@ export default function QuizPage() {
         });
       } catch (error) {
         console.error('Error generating quiz:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate the quiz. Please try again.';
         toast({
           title: 'Error Generating Quiz',
-          description: (error as Error).message || 'Failed to generate the quiz. Please try again.',
+          description: errorMessage,
           variant: 'destructive',
         });
       }

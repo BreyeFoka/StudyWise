@@ -84,15 +84,16 @@ export default function ChatbotPage() {
         setMessages((prev) => [...prev, newAssistantMessage]);
       } catch (error) {
         console.error('Chat error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get a response from the chatbot. Please try again.';
         toast({
           title: 'Error',
-          description: 'Failed to get a response from the chatbot. Please try again.',
+          description: errorMessage,
           variant: 'destructive',
         });
          const errorAssistantMessage: DisplayMessage = {
           id: `${Date.now()}-error-${Math.random()}`,
           role: 'assistant',
-          content: "I'm having trouble responding right now. Please try again in a moment.",
+          content: `I'm having trouble responding: ${errorMessage.length > 100 ? errorMessage.substring(0,97) + '...' : errorMessage }`,
           icon: <Bot className="h-5 w-5 text-destructive" />,
         };
         setMessages((prev) => [...prev, errorAssistantMessage]);
