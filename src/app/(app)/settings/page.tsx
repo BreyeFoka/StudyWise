@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,12 +8,19 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { UserCircle, Bell, Palette, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
+import { useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Settings - StudyWise',
-};
+// Metadata should be defined in a server component or layout if needed statically.
+// For client components, document.title can be set in useEffect.
+// export const metadata: Metadata = {
+//   title: 'Settings - StudyWise',
+// };
 
 export default function SettingsPage() {
+  useEffect(() => {
+    document.title = 'Settings - StudyWise';
+  }, []);
+
   return (
     <div className="container mx-auto py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
@@ -90,11 +99,18 @@ export default function SettingsPage() {
                 <span>Dark Mode</span>
                  <span className="text-xs text-muted-foreground">Toggle between light and dark themes.</span>
               </Label>
-              {/* Basic toggle, actual theme switching would require more logic (e.g. next-themes) */}
               <Switch id="theme-mode" onCheckedChange={(checked) => {
-                if (checked) document.documentElement.classList.add('dark');
-                else document.documentElement.classList.remove('dark');
-              }}/>
+                if (checked) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              }}
+              // Check current theme on mount to set initial switch state
+              // This assumes you might have a theme persistence mechanism (e.g., localStorage with next-themes)
+              // For a simple demo, we can check the class directly if set by other means or default to light.
+              defaultChecked={typeof window !== 'undefined' && document.documentElement.classList.contains('dark')}
+              />
             </div>
           </CardContent>
         </Card>
