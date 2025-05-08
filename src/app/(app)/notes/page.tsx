@@ -44,9 +44,10 @@ export default function NotesPage() {
         });
       } catch (error) {
         console.error('Error summarizing notes:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to summarize the document. Please try again.';
         toast({
           title: 'Error',
-          description: 'Failed to summarize the document. Please try again.',
+          description: errorMessage,
           variant: 'destructive',
         });
         setSummary(null);

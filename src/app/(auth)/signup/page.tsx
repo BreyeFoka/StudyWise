@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import type { AuthError } from 'firebase/auth';
 import { Logo } from '@/components/logo';
 
 export const SignUpSchema = z.object({
-  // name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(), // Made optional for now
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
@@ -25,7 +26,7 @@ export const SignUpSchema = z.object({
 // if confirmPassword field is added.
 
 export default function SignUpPage() {
-  const { signUpWithEmail, user, loading: authLoading, isFirebaseReady } = useAuth();
+  const { signUpWithEmail, user, loading: authLoading, isFirebaseReady, auth } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +34,7 @@ export default function SignUpPage() {
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
-      // name: '',
+      name: '',
       email: '',
       password: '',
     },
@@ -48,8 +49,17 @@ export default function SignUpPage() {
 
   const onSubmit = async (values: z.infer<typeof SignUpSchema>) => {
     setIsSubmitting(true);
+    if (!isFirebaseReady || !auth) { // Check if auth instance is available
+      toast({
+        title: 'Sign Up Unavailable',
+        description: 'Firebase authentication service is not ready. Please try again later or contact support if the issue persists.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
     try {
-      await signUpWithEmail(values);
+      await signUpWithEmail(values, values.name);
       toast({ title: 'Account Created!', description: "Welcome! Your account has been successfully created." });
       router.push('/dashboard');
     } catch (error) {
@@ -66,8 +76,11 @@ export default function SignUpPage() {
           case 'auth/weak-password':
             errorMessage = 'Password is too weak. Please choose a stronger password.';
             break;
+          case 'auth/configuration-not-found':
+            errorMessage = 'Firebase authentication is not configured for this project. Please ensure Email/Password sign-in is enabled in the Firebase console.';
+            break;
           default:
-            errorMessage = 'Sign up failed. Please try again.';
+            errorMessage = `Sign up failed: ${authError.message}. Please try again. (Code: ${authError.code})`;
         }
       }
       toast({
@@ -89,14 +102,14 @@ export default function SignUpPage() {
     );
   }
   
-  if (!isFirebaseReady && !authLoading) {
+  if (!isFirebaseReady && !authLoading && !auth) { // Check if auth instance is also not available
      return (
        <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
            <Link href="/" className="mb-4"><Logo /></Link>
           <CardTitle className="text-2xl">Sign Up Unavailable</CardTitle>
           <CardDescription>
-            Firebase is not configured. Please contact support.
+           Firebase authentication is not configured or failed to initialize. Please check environment variables or contact support.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -114,19 +127,19 @@ export default function SignUpPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* <FormField
+            <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Full Name (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Your Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -153,7 +166,7 @@ export default function SignUpPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting || !isFirebaseReady || !auth}>
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
