@@ -445,8 +445,12 @@ export default function FlashcardsPage() {
             <div className="flex justify-between items-center">
               <CardTitle>{currentCard.deck}</CardTitle>
               <div className="flex items-center gap-2">
-                 <Button variant="ghost" size="icon" onClick={() => handleOpenCreateModal(currentCard)} title="Edit this card" disabled={isUIDisabled}><Edit className="h-4 w-4" /></Button>
-                 <Button variant="ghost" size="icon" onClick={() => handleDeleteCard(currentCard.id)} title="Delete this card" className="text-destructive hover:text-destructive/80" disabled={isUIDisabled}><Trash2 className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => handleOpenCreateModal(currentCard)} title="Edit this card" disabled={isUIDisabled}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDeleteCard(currentCard.id)} title="Delete this card" className="text-destructive hover:text-destructive/80" disabled={isUIDisabled}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
                 <CardDescription>{answeredCardIdsInSession.size + 1} / {sessionTotalDueCards}</CardDescription>
               </div>
             </div>
@@ -459,35 +463,44 @@ export default function FlashcardsPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             {!showAnswer ? (
-              <Button onClick={handleShowAnswer} className="w-full" size="lg" disabled={isUIDisabled || isSaving}>Show Answer</Button>
+              <Button onClick={handleShowAnswer} className="w-full" size="lg" disabled={isUIDisabled || isSaving}>
+                Show Answer
+              </Button>
             ) : (
               <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <Button variant="destructive" onClick={() => handleNextCard(0)} className="w-full" disabled={isUIDisabled || isSaving}>Again (0)</Button>
-                <Button variant="outline" onClick={() => handleNextCard(2)} className="w-full" disabled={isUIDisabled || isSaving}>Hard (2)</Button>
-                <Button variant="outline" onClick={() => handleNextCard(3)} className="w-full" disabled={isUIDisabled || isSaving}>Good (3)</Button>
-                <Button variant="default" onClick={() => handleNextCard(5)} className="w-full" disabled={isUIDisabled || isSaving}>Easy (5)</Button>
+                <Button variant="destructive" onClick={() => handleNextCard(0)} className="w-full" disabled={isUIDisabled || isSaving}>
+                  Again (0)
+                </Button>
+                <Button variant="outline" onClick={() => handleNextCard(2)} className="w-full" disabled={isUIDisabled || isSaving}>
+                  Hard (2)
+                </Button>
+                <Button variant="outline" onClick={() => handleNextCard(3)} className="w-full" disabled={isUIDisabled || isSaving}>
+                  Good (3)
+                </Button>
+                <Button variant="default" onClick={() => handleNextCard(5)} className="w-full" disabled={isUIDisabled || isSaving}>
+                  Easy (5)
+                </Button>
               </div>
             )}
-             <p className="text-xs text-muted-foreground flex items-center gap-1 text-center"><Info className="h-3 w-3 flex-shrink-0" /> Spaced repetition helps you remember better. Rate your recall honestly.</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 text-center">
+              <Info className="h-3 w-3 flex-shrink-0" /> Spaced repetition helps you remember better. Rate your recall honestly.
+            </p>
           </CardFooter>
         </Card>
-      ) : ( // No current card to review
+      ) : (
         <Card className="text-center py-10 shadow-xl">
-           <CardHeader><CardTitle className="flex items-center justify-center gap-2 text-2xl"><Check className="h-8 w-8 text-green-500" />{activeDeckFilter ? `All caught up on ${activeDeckFilter}!` : "All Caught Up!"}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+              <Check className="h-8 w-8 text-green-500" />
+              {activeDeckFilter ? `All caught up on ${activeDeckFilter}!` : "All Caught Up!"}
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6">{sessionTotalDueCards > 0 && answeredCardIdsInSession.size === sessionTotalDueCards ? `You've reviewed all ${sessionTotalDueCards} cards for this ${activeDeckFilter ? `deck's ` : ''}session.` : `You have no flashcards due for review in ${activeDeckFilter ? activeDeckFilter : 'any deck'} right now.`}</p>
-            <Image data-ai-hint="celebration study" src="https://picsum.photos/seed/flashcardsdone/300/200" alt="All done illustration" width={300} height={200} className="mt-4 mx-auto rounded-lg shadow-md" />
-            {activeDeckFilter && <Button onClick={handleStudyAllDue} className="mt-6" disabled={isUIDisabled}>Review Other Due Cards</Button>}
-            {!activeDeckFilter && allFlashcards.length > 0 && dueFlashcards.length === 0 && <p className="mt-4 text-muted-foreground">Check back later for more cards to review!</p>}
-             {allFlashcards.length === 0 && !isLoadingFlashcards && (
-                <p className="mt-4 text-lg text-muted-foreground">
-                    Looks like you don&apos;t have any flashcards yet.
-                    <br />
-                    <Button onClick={() => handleOpenCreateModal()} variant="link" className="text-lg px-1" disabled={isUIDisabled}>Create some manually</Button>
-                    or
-                    <Button onClick={handleOpenAIGenerateModal} variant="link" className="text-lg px-1" disabled={isUIDisabled}>generate with AI!</Button>
-                </p>
-            )}
+            <p className="text-muted-foreground mb-6">
+              {sessionTotalDueCards > 0 && answeredCardIdsInSession.size === sessionTotalDueCards
+                ? `You've reviewed all ${sessionTotalDueCards} cards for this ${activeDeckFilter ? `deck's ` : ''}session.`
+                : `You have no flashcards due for review in ${activeDeckFilter ? activeDeckFilter : 'any deck'} right now.`}
+            </p>
           </CardContent>
         </Card>
       )}
