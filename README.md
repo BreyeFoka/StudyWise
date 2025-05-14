@@ -1,5 +1,6 @@
-# Firebase Studio
+# Study WISE
 
-This is a NextJS starter in Firebase Studio.
+## Your all in one solution to study
 
-To get started, take a look at src/app/page.tsx.
+This app is unisng NextJS & Firebase
+
