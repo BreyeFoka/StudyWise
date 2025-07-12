@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-gradient-to-r from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 px-4 backdrop-blur-xl shadow-sm md:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
             {/* Placeholder for breadcrumbs or page title */}
@@ -75,15 +75,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300">
                   <UserCircle className="h-5 w-5" />
                   <span className="sr-only">User Profile</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                    <p className="text-sm font-medium leading-none bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                       {user.displayName || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
@@ -115,7 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
              </Button>
           )}
         </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/50 dark:from-slate-950/50 dark:via-slate-900 dark:to-blue-950/50 min-h-screen">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

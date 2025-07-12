@@ -386,131 +386,307 @@ export default function FlashcardsPage() {
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Flashcards</h1>
-          <p className="text-muted-foreground">Review your flashcards using spaced repetition.</p>
-          {activeDeckFilter && <p className="text-sm text-primary">Currently studying: <strong>{activeDeckFilter}</strong></p>}
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Flashcards</h1>
+          <p className="text-slate-600 dark:text-slate-400">Review your flashcards using spaced repetition.</p>
+          {activeDeckFilter && (
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <p className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-medium">
+                Currently studying: <strong>{activeDeckFilter}</strong>
+              </p>
+            </div>
+          )}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {activeDeckFilter && <Button variant="outline" onClick={handleStudyAllDue} disabled={isUIDisabled}><RefreshCw className="mr-2 h-4 w-4" /> Study All Due</Button>}
-          <Button variant="outline" onClick={handleOpenAIGenerateModal} disabled={isUIDisabled}><Sparkles className="mr-2 h-4 w-4" /> Generate with AI</Button>
-          <Button variant="default" onClick={() => handleOpenCreateModal()} disabled={isUIDisabled}><PlusCircle className="mr-2 h-4 w-4" /> Add Manually</Button>
+        <div className="flex flex-wrap gap-3">
+          {activeDeckFilter && (
+            <Button variant="outline" onClick={handleStudyAllDue} disabled={isUIDisabled} className="border-slate-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:border-slate-600 dark:hover:from-blue-950 dark:hover:to-purple-950">
+              <RefreshCw className="mr-2 h-4 w-4" /> Study All Due
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleOpenAIGenerateModal} disabled={isUIDisabled} className="border-gradient-to-r from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-950 dark:hover:to-pink-950">
+            <Sparkles className="mr-2 h-4 w-4 text-purple-600 dark:text-purple-400" /> Generate with AI
+          </Button>
+          <Button onClick={() => handleOpenCreateModal()} disabled={isUIDisabled} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Manually
+          </Button>
         </div>
       </div>
 
       {/* Manual Add/Edit Flashcard Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px] border-0 shadow-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
           <DialogHeader>
-            <DialogTitle>{editingFlashcard ? 'Edit Flashcard' : 'Create New Flashcard'}</DialogTitle>
-            <DialogDescription>{editingFlashcard ? 'Modify details.' : 'Add a new question and answer.'}</DialogDescription>
+            <DialogTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {editingFlashcard ? 'Edit Flashcard' : 'Create New Flashcard'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-600 dark:text-slate-400">
+              {editingFlashcard ? 'Modify the flashcard details below.' : 'Add a new question and answer to your deck.'}
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="question" className="text-right">Question</Label><Textarea id="question" value={newCardQuestion} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewCardQuestion(e.target.value)} className="col-span-3" placeholder="Enter question" rows={3} disabled={isSaving}/></div>
-            <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="answer" className="text-right">Answer</Label><Textarea id="answer" value={newCardAnswer} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewCardAnswer(e.target.value)} className="col-span-3" placeholder="Enter answer" rows={3} disabled={isSaving}/></div>
-            <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="deck" className="text-right">Deck</Label><Input id="deck" value={newCardDeck} onChange={(e: ChangeEvent<HTMLInputElement>) => setNewCardDeck(e.target.value)} className="col-span-3" placeholder="Deck name (e.g., Biology)" list="deck-suggestions" disabled={isSaving}/><datalist id="deck-suggestions">{allDecks.map(deck => <option key={deck} value={deck} />)}</datalist></div>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="question" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Question</Label>
+              <Textarea 
+                id="question" 
+                value={newCardQuestion} 
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewCardQuestion(e.target.value)} 
+                className="min-h-[100px] bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl" 
+                placeholder="Enter your question here..." 
+                rows={3} 
+                disabled={isSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="answer" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Answer</Label>
+              <Textarea 
+                id="answer" 
+                value={newCardAnswer} 
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewCardAnswer(e.target.value)} 
+                className="min-h-[100px] bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl" 
+                placeholder="Enter the answer here..." 
+                rows={3} 
+                disabled={isSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deck" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deck Name</Label>
+              <Input 
+                id="deck" 
+                value={newCardDeck} 
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewCardDeck(e.target.value)} 
+                className="bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-emerald-500 dark:focus:border-emerald-400 rounded-xl" 
+                placeholder="e.g., Biology, History, Math..." 
+                list="deck-suggestions" 
+                disabled={isSaving}
+              />
+              <datalist id="deck-suggestions">
+                {allDecks.map(deck => <option key={deck} value={deck} />)}
+              </datalist>
+            </div>
           </div>
-          <DialogFooter><DialogClose asChild><Button variant="outline" disabled={isSaving}>Cancel</Button></DialogClose><Button onClick={handleSaveFlashcard} disabled={isSaving || !newCardQuestion.trim() || !newCardAnswer.trim() || !newCardDeck.trim()}>
-            {isSaving ? <Loader2 className="animate-spin mr-2"/> : (editingFlashcard ? 'Save Changes' : 'Create Flashcard')}
-            </Button></DialogFooter>
+          <DialogFooter className="gap-3">
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isSaving} className="border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              onClick={handleSaveFlashcard} 
+              disabled={isSaving || !newCardQuestion.trim() || !newCardAnswer.trim() || !newCardDeck.trim()}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  {editingFlashcard ? 'Save Changes' : 'Create Flashcard'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* AI Generate Flashcards Modal */}
       <Dialog open={isAIGenerateModalOpen} onOpenChange={setIsAIGenerateModalOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl border-0 shadow-2xl bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950">
           <DialogHeader>
-            <DialogTitle>Generate Flashcards with AI</DialogTitle>
-            <DialogDescription>Let AI create flashcards from your document or a topic.</DialogDescription>
+            <DialogTitle className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              Generate Flashcards with AI
+            </DialogTitle>
+            <DialogDescription className="text-slate-600 dark:text-slate-400">
+              Let our AI create personalized flashcards from your document or topic.
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div><Label htmlFor="ai-deckName">Deck Name</Label><Input id="ai-deckName" value={aiGenDeckName} onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenDeckName(e.target.value)} placeholder="Enter deck name" list="deck-suggestions-ai" disabled={isGeneratingAI}/><datalist id="deck-suggestions-ai">{allDecks.map(deck => <option key={`ai-${deck}`} value={deck} />)}</datalist></div>
-            <div><Label>Source Material</Label><FileUpload onFileSelect={handleAiFileSelect} acceptedFileTypes="application/pdf,text/plain,.md,.txt" /><p className="text-xs text-muted-foreground mt-1">Upload document (PDF, TXT, MD). {aiGenFileName && `Selected: ${aiGenFileName}`}</p></div>
-            <div className="text-center my-1 text-sm text-muted-foreground">OR</div>
-            <div><Label htmlFor="ai-topic">Topic</Label><Input id="ai-topic" value={aiGenTopic} onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenTopic(e.target.value)} placeholder="e.g., Photosynthesis Process" disabled={isGeneratingAI}/></div>
-            <div><Label htmlFor="ai-numFlashcards">Number of Flashcards (1-20)</Label><Input id="ai-numFlashcards" type="number" min="1" max="20" value={aiGenNumFlashcards} onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenNumFlashcards(Math.max(1, Math.min(20, parseInt(e.target.value,10) || 5)))} disabled={isGeneratingAI}/></div>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="ai-deckName" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Deck Name</Label>
+              <Input 
+                id="ai-deckName" 
+                value={aiGenDeckName} 
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenDeckName(e.target.value)} 
+                placeholder="Enter a name for your new deck" 
+                list="deck-suggestions-ai" 
+                disabled={isGeneratingAI}
+                className="bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl"
+              />
+              <datalist id="deck-suggestions-ai">
+                {allDecks.map(deck => <option key={`ai-${deck}`} value={deck} />)}
+              </datalist>
+            </div>
+            
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Source Material</Label>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
+                <FileUpload onFileSelect={handleAiFileSelect} acceptedFileTypes="application/pdf,text/plain,.md,.txt" />
+                {aiGenFileName && (
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-2 font-medium">
+                    ✓ Selected: {aiGenFileName}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800"></div>
+              <span className="text-sm text-slate-500 dark:text-slate-400 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 px-3 py-1 rounded-full">OR</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-pink-200 to-purple-200 dark:from-pink-800 dark:to-purple-800"></div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ai-topic" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Topic</Label>
+              <Input 
+                id="ai-topic" 
+                value={aiGenTopic} 
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenTopic(e.target.value)} 
+                placeholder="e.g., Photosynthesis, World War II, Calculus Derivatives" 
+                disabled={isGeneratingAI}
+                className="bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-pink-500 dark:focus:border-pink-400 rounded-xl"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ai-numFlashcards" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Number of Flashcards</Label>
+              <Input 
+                id="ai-numFlashcards" 
+                type="number" 
+                min="1" 
+                max="20" 
+                value={aiGenNumFlashcards} 
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setAiGenNumFlashcards(Math.max(1, Math.min(20, parseInt(e.target.value,10) || 5)))} 
+                disabled={isGeneratingAI}
+                className="bg-white/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600 focus:border-emerald-500 dark:focus:border-emerald-400 rounded-xl w-32"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400">Choose between 1-20 flashcards</p>
+            </div>
           </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline" disabled={isGeneratingAI}>Cancel</Button></DialogClose>
-            <Button onClick={handleAIGenerateFlashcards} disabled={isGeneratingAI || !aiGenDeckName.trim() || (!aiGenFileDataUri && !aiGenTopic.trim())}>
-              {isGeneratingAI ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generate Flashcards
+          <DialogFooter className="gap-3">
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isGeneratingAI} className="border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              onClick={handleAIGenerateFlashcards} 
+              disabled={isGeneratingAI || !aiGenDeckName.trim() || (!aiGenFileDataUri && !aiGenTopic.trim())}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              {isGeneratingAI ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Flashcards
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {currentCard ? (
-        <Card className="max-w-2xl mx-auto shadow-xl">
-          <CardHeader>
+        <Card className="max-w-2xl mx-auto border-0 shadow-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 hover:shadow-3xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-b border-slate-200 dark:border-slate-700">
             <div className="flex justify-between items-center">
-              <CardTitle>{currentCard.deck}</CardTitle>
+              <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{currentCard.deck}</CardTitle>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleOpenCreateModal(currentCard)} title="Edit this card" disabled={isUIDisabled}>
+                <Button variant="ghost" size="icon" onClick={() => handleOpenCreateModal(currentCard)} title="Edit this card" disabled={isUIDisabled} className="hover:bg-blue-100 dark:hover:bg-blue-900">
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDeleteCard(currentCard.id)} title="Delete this card" className="text-destructive hover:text-destructive/80" disabled={isUIDisabled}>
+                <Button variant="ghost" size="icon" onClick={() => handleDeleteCard(currentCard.id)} title="Delete this card" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" disabled={isUIDisabled}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
-                <CardDescription>{answeredCardIdsInSession.size + 1} / {sessionTotalDueCards}</CardDescription>
+                <div className="ml-2 px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full">
+                  <CardDescription className="text-xs font-medium text-blue-700 dark:text-blue-300">{answeredCardIdsInSession.size + 1} / {sessionTotalDueCards}</CardDescription>
+                </div>
               </div>
             </div>
-            <Progress value={sessionProgress} className="mt-2" aria-label={`${Math.round(sessionProgress)}% of session complete`} />
+            <Progress value={sessionProgress} className="mt-3 h-2 bg-slate-200 dark:bg-slate-700" aria-label={`${Math.round(sessionProgress)}% of session complete`} />
           </CardHeader>
-          <CardContent className="min-h-[250px] flex flex-col items-center justify-center text-center p-6">
-            <p className="text-xl md:text-2xl font-semibold mb-4">{currentCard.question}</p>
-            {showAnswer && <p className="text-lg md:text-xl text-accent">{currentCard.answer}</p>}
-            {isSaving && currentCard.id === (editingFlashcard?.id || currentCard?.id) && <Loader2 className="h-5 w-5 animate-spin text-primary my-2" />}
+          <CardContent className="min-h-[300px] flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-950">
+            <div className="max-w-lg">
+              <p className="text-xl md:text-2xl font-semibold mb-6 text-slate-800 dark:text-slate-200 leading-relaxed">{currentCard.question}</p>
+              {showAnswer && (
+                <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                  <p className="text-lg md:text-xl text-emerald-800 dark:text-emerald-200 font-medium">{currentCard.answer}</p>
+                </div>
+              )}
+              {isSaving && currentCard.id === (editingFlashcard?.id || currentCard?.id) && (
+                <div className="mt-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-500 mx-auto" />
+                </div>
+              )}
+            </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 p-6">
             {!showAnswer ? (
-              <Button onClick={handleShowAnswer} className="w-full" size="lg" disabled={isUIDisabled || isSaving}>
+              <Button onClick={handleShowAnswer} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" size="lg" disabled={isUIDisabled || isSaving}>
+                <BookOpen className="mr-2 h-5 w-5" />
                 Show Answer
               </Button>
             ) : (
-              <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <Button variant="destructive" onClick={() => handleNextCard(0)} className="w-full" disabled={isUIDisabled || isSaving}>
-                  Again (0)
+              <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Button variant="destructive" onClick={() => handleNextCard(0)} className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg transition-all duration-300" disabled={isUIDisabled || isSaving}>
+                  Again
+                  <span className="block text-xs opacity-80">0</span>
                 </Button>
-                <Button variant="outline" onClick={() => handleNextCard(2)} className="w-full" disabled={isUIDisabled || isSaving}>
-                  Hard (2)
+                <Button variant="outline" onClick={() => handleNextCard(2)} className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950 shadow-md hover:shadow-lg transition-all duration-300" disabled={isUIDisabled || isSaving}>
+                  Hard
+                  <span className="block text-xs opacity-80">2</span>
                 </Button>
-                <Button variant="outline" onClick={() => handleNextCard(3)} className="w-full" disabled={isUIDisabled || isSaving}>
-                  Good (3)
+                <Button variant="outline" onClick={() => handleNextCard(3)} className="w-full border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950 shadow-md hover:shadow-lg transition-all duration-300" disabled={isUIDisabled || isSaving}>
+                  Good
+                  <span className="block text-xs opacity-80">3</span>
                 </Button>
-                <Button variant="default" onClick={() => handleNextCard(5)} className="w-full" disabled={isUIDisabled || isSaving}>
-                  Easy (5)
+                <Button onClick={() => handleNextCard(5)} className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md hover:shadow-lg transition-all duration-300" disabled={isUIDisabled || isSaving}>
+                  Easy
+                  <span className="block text-xs opacity-80">5</span>
                 </Button>
               </div>
             )}
-            <p className="text-xs text-muted-foreground flex items-center gap-1 text-center">
-              <Info className="h-3 w-3 flex-shrink-0" /> Spaced repetition helps you remember better. Rate your recall honestly.
-            </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <Info className="h-3 w-3 flex-shrink-0" />
+              <span>Spaced repetition helps you remember better. Rate your recall honestly.</span>
+            </div>
           </CardFooter>
         </Card>
       ) : (
-        <Card className="text-center py-10 shadow-xl">
+        <Card className="text-center py-12 border-0 shadow-2xl bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-emerald-950">
           <CardHeader>
-            <CardTitle className="flex items-center justify-center gap-2 text-2xl">
-              <Check className="h-8 w-8 text-green-500" />
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-full flex items-center justify-center mb-4">
+              <Check className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <CardTitle className="flex items-center justify-center gap-3 text-2xl bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
               {activeDeckFilter ? `All caught up on ${activeDeckFilter}!` : "All Caught Up!"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
               {sessionTotalDueCards > 0 && answeredCardIdsInSession.size === sessionTotalDueCards
-                ? `You've reviewed all ${sessionTotalDueCards} cards for this ${activeDeckFilter ? `deck's ` : ''}session.`
-                : `You have no flashcards due for review in ${activeDeckFilter ? activeDeckFilter : 'any deck'} right now.`}
+                ? `Amazing! You've reviewed all ${sessionTotalDueCards} cards for this ${activeDeckFilter ? `deck's ` : ''}session. Great job staying consistent!`
+                : `You have no flashcards due for review in ${activeDeckFilter ? activeDeckFilter : 'any deck'} right now. Check back later or create new cards!`}
             </p>
           </CardContent>
         </Card>
       )}
 
       <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-6">All Decks</h2>
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">All Decks</h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800"></div>
+        </div>
         {isLoadingFlashcards && user ? (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2,3].map(i => (
-              <Card key={`skeleton-${i}`} className="shadow-lg">
+              <Card key={`skeleton-${i}`} className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
                 <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
                 <CardContent className="space-y-2">
                   <Skeleton className="h-4 w-1/2" />
@@ -527,23 +703,50 @@ export default function FlashcardsPage() {
               const today = new Date(); today.setHours(0,0,0,0);
               const dueInDeckCount = cardsInDeck.filter(fc => new Date(fc.dueDate) <= today).length;
               return (
-                <Card key={deckName} className="shadow-lg hover:shadow-xl transition-shadow">
-                  <CardHeader><CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary" />{deckName}</CardTitle></CardHeader>
-                  <CardContent>
-                    <p>{cardsInDeck.length} card{cardsInDeck.length === 1 ? '' : 's'} total</p>
-                    <p className={dueInDeckCount > 0 ? "text-accent font-semibold" : "text-muted-foreground"}>{dueInDeckCount > 0 ? `${dueInDeckCount} card${dueInDeckCount === 1 ? '' : 's'} due` : "No cards due"}</p>
+                <Card key={deckName} className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg">
+                        <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className="text-slate-800 dark:text-slate-200">{deckName}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{cardsInDeck.length} card{cardsInDeck.length === 1 ? '' : 's'} total</p>
+                    <p className={`text-sm font-medium ${dueInDeckCount > 0 ? "text-orange-600 dark:text-orange-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                      {dueInDeckCount > 0 ? `${dueInDeckCount} card${dueInDeckCount === 1 ? '' : 's'} due` : "✓ All caught up"}
+                    </p>
                   </CardContent>
-                  <CardFooter><Button variant="outline" className="w-full" onClick={() => handleStudyDeck(deckName)} disabled={isUIDisabled || (activeDeckFilter === deckName && dueFlashcards.length > 0)}>Study {deckName} Deck</Button></CardFooter>
+                  <CardFooter className="pt-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-slate-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:border-slate-600 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300" 
+                      onClick={() => handleStudyDeck(deckName)} 
+                      disabled={isUIDisabled || (activeDeckFilter === deckName && dueFlashcards.length > 0)}
+                    >
+                      Study {deckName} Deck
+                    </Button>
+                  </CardFooter>
                 </Card>
               );
             })}
           </div>
         ) : (
-            <div className="text-center py-10 border-2 border-dashed rounded-lg">
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg mb-2">No flashcard decks yet.</p>
-                <Button onClick={() => handleOpenCreateModal()} disabled={isUIDisabled}><PlusCircle className="mr-2 h-4 w-4" /> Create Your First Flashcard</Button>
-                <Button onClick={handleOpenAIGenerateModal} variant="outline" className="ml-2" disabled={isUIDisabled}><Sparkles className="mr-2 h-4 w-4" /> Generate with AI</Button>
+            <div className="text-center py-16 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-6">
+                  <BookOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-lg mb-2">No flashcard decks yet.</p>
+                <p className="text-slate-500 dark:text-slate-500 text-sm mb-6">Create your first deck to start learning!</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={() => handleOpenCreateModal()} disabled={isUIDisabled} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Flashcard
+                  </Button>
+                  <Button onClick={handleOpenAIGenerateModal} variant="outline" disabled={isUIDisabled} className="border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-950">
+                    <Sparkles className="mr-2 h-4 w-4" /> Generate with AI
+                  </Button>
+                </div>
             </div>
         )}
       </div>

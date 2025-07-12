@@ -47,43 +47,52 @@ export function FileUpload({ onFileSelect, acceptedFileTypes = "application/pdf,
 
   return (
     <div className="w-full">
-      <Label htmlFor="file-upload-input" className="block mb-2 text-sm font-medium">
+      <Label htmlFor="file-upload-input" className="block mb-3 text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
         Upload Document
       </Label>
       {!selectedFile ? (
         <div className="flex items-center justify-center w-full">
           <Label
             htmlFor="file-upload-input"
-            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-secondary/50"
+            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300 shadow-sm hover:shadow-md"
           >
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <UploadCloud className="w-10 h-10 mb-3 text-muted-foreground" />
-              <p className="mb-2 text-sm text-muted-foreground">
-                <span className="font-semibold">Click to upload</span> or drag and drop
+              <div className="mb-4 p-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full">
+                <UploadCloud className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              </div>
+              <p className="mb-2 text-sm text-slate-700 dark:text-slate-300">
+                <span className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Click to upload</span> or drag and drop
               </p>
-              <p className="text-xs text-muted-foreground">PDF, PPT, DOC, TXT, Audio files</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">PDF, PPT, DOC, TXT, Audio files (max 10MB)</p>
             </div>
             <Input id="file-upload-input" type="file" className="hidden" onChange={handleFileChange} accept={acceptedFileTypes} />
           </Label>
         </div>
       ) : (
-        <div className="p-4 border rounded-lg bg-card">
+        <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium truncate max-w-xs">{selectedFile.name}</p>
-            <Button variant="ghost" size="icon" onClick={handleRemoveFile}>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-lg">
+                <UploadCloud className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate max-w-xs">{selectedFile.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleRemoveFile} className="hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400">
               <X className="h-4 w-4" />
             </Button>
           </div>
           {preview && selectedFile.type.startsWith('image/') && (
              // eslint-disable-next-line @next/next/no-img-element
-            <img data-ai-hint="file preview" src={preview} alt="Preview" className="mt-2 rounded-md max-h-48 object-contain" />
+            <img data-ai-hint="file preview" src={preview} alt="Preview" className="mt-3 rounded-lg max-h-48 object-contain border border-slate-200 dark:border-slate-700" />
           )}
           {selectedFile.type.startsWith('audio/') && (
-            <audio controls src={preview || ''} className="mt-2 w-full">
+            <audio controls src={preview || ''} className="mt-3 w-full">
               Your browser does not support the audio element.
             </audio>
           )}
-          {/* Add more previews for other file types if needed, e.g. PDF placeholder */}
         </div>
       )}
     </div>

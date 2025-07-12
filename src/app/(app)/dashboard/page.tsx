@@ -170,12 +170,17 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Welcome to your Dashboard, {user?.displayName || user?.email?.split('@')[0] || 'Student'}!</h1>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Welcome back, {user?.displayName || user?.email?.split('@')[0] || 'Student'}!
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400">Here's what's happening with your studies today.</p>
+      </div>
       
       {isLoadingData ? (
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[...Array(4)].map((_, i) => (
-                <Card key={i} className="shadow-md">
+                <Card key={i} className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
                     <CardHeader className="pb-2"><Skeleton className="h-5 w-3/4" /></CardHeader>
                     <CardContent><Skeleton className="h-8 w-1/2 mb-1" /><Skeleton className="h-3 w-1/4" /></CardContent>
                 </Card>
@@ -183,43 +188,51 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-950 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Flashcards</CardTitle>
-              <Layers className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Flashcards</CardTitle>
+              <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg">
+                <Layers className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalFlashcards}</div>
-              <p className="text-xs text-muted-foreground">{totalDecks} deck{totalDecks === 1 ? '' : 's'}</p>
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">{totalFlashcards}</div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{totalDecks} deck{totalDecks === 1 ? '' : 's'}</p>
             </CardContent>
           </Card>
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Flashcards Due</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Flashcards Due</CardTitle>
+              <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 rounded-lg">
+                <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dueFlashcardsCount}</div>
-              <p className="text-xs text-muted-foreground text-accent">{dueFlashcardsCount > 0 ? "Time to review!" : "All caught up!"}</p>
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">{dueFlashcardsCount}</div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{dueFlashcardsCount > 0 ? "Time to review!" : "All caught up!"}</p>
             </CardContent>
           </Card>
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-pink-50 dark:from-slate-900 dark:to-pink-950 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Upcoming Deadlines</CardTitle>
+              <div className="p-2 bg-gradient-to-r from-pink-100 to-pink-200 dark:from-pink-900 dark:to-pink-800 rounded-lg">
+                <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{upcomingDeadlines}</div>
-              <p className="text-xs text-muted-foreground">Next: Mock Assignment</p>
+              <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-700 bg-clip-text text-transparent">{upcomingDeadlines}</div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Next: Mock Assignment</p>
             </CardContent>
           </Card>
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-emerald-950 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Study Progress</CardTitle>
-              <BarChart className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">Study Progress</CardTitle>
+              <div className="p-2 bg-gradient-to-r from-emerald-100 to-emerald-200 dark:from-emerald-900 dark:to-emerald-800 rounded-lg">
+                <BarChart className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold mb-1">{overallProgress}%</div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent mb-1">{overallProgress}%</div>
               <Progress value={overallProgress} aria-label={`${overallProgress}% overall progress`} className="h-2" />
             </CardContent>
           </Card>
@@ -227,9 +240,9 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 shadow-md">
+        <Card className="lg:col-span-2 border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Recent Activity</CardTitle>
             <CardDescription>Your latest study sessions and achievements.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -245,36 +258,42 @@ export default function DashboardPage() {
             ) : recentActivities.length > 0 ? (
               <ul className="space-y-4">
                 {recentActivities.map((activity, index) => (
-                  <li key={index} className="flex items-center p-3 rounded-md hover:bg-secondary/50 transition-colors">
-                    <div className="p-2 bg-primary/10 rounded-full mr-4">
+                  <li key={index} className="flex items-center p-4 rounded-xl bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-700 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300 border border-slate-200 dark:border-slate-600">
+                    <div className="p-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full mr-4">
                       {activity.icon}
                     </div>
                     <div className="flex-1">
                        {activity.href ? (
                          <Link href={activity.href} className="hover:underline">
-                           <p className="font-medium">{activity.title}</p>
+                           <p className="font-medium text-slate-800 dark:text-slate-200">{activity.title}</p>
                          </Link>
                        ) : (
-                          <p className="font-medium">{activity.title}</p>
+                          <p className="font-medium text-slate-800 dark:text-slate-200">{activity.title}</p>
                        )}
-                      <p className="text-sm text-muted-foreground">{activity.time}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{activity.time}</p>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground py-6 text-center">No recent activity to display. Start using StudyWise features!</p>
+              <div className="text-center py-12">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mb-4">
+                  <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="text-slate-500 dark:text-slate-400 mb-4">No recent activity to display</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">Start using StudyWise features to see your progress here!</p>
+              </div>
             )}
           </CardContent>
         </Card>
-        <Card className="shadow-md">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Quick Actions</CardTitle>
             <CardDescription>Jump right into your study tasks.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col space-y-3">
             {quickActions.map((action) => (
-              <Button key={action.href} variant="outline" asChild className="justify-start text-left hover:bg-primary/5 hover:text-primary">
+              <Button key={action.href} variant="outline" asChild className="justify-start text-left border-0 bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-700 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 hover:scale-[1.02] transition-all duration-300 shadow-sm hover:shadow-md">
                 <Link href={action.href}>
                   {action.icon}
                   {action.label}

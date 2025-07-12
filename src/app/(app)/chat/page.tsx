@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, MessageCircle, Send, User, Bot } from 'lucide-react';
+import { Loader2, MessageCircle, Send, User, Bot, Sparkles, Zap } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { contextualChat, type ContextualChatInput, type ChatMessage as AIChatMessage } from '@/ai/flows/contextual-chat-flow';
 import { useToast } from '@/hooks/use-toast';
@@ -105,89 +105,145 @@ export default function ChatbotPage() {
     <div className="container mx-auto py-6 md:py-8 h-full flex flex-col">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Contextual Chatbot</h1>
-          <p className="text-muted-foreground">Ask questions and get answers from StudyWise AI.</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI Study Assistant</h1>
+          <p className="text-slate-600 dark:text-slate-400">Ask questions and get intelligent answers from StudyWise AI.</p>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-purple-600 dark:text-purple-400">Powered by Advanced AI</span>
+          </div>
         </div>
-        {/* Future: Add button for uploading/selecting context documents */}
       </div>
 
-      <Card className="flex-1 flex flex-col shadow-xl overflow-hidden">
-        <ScrollArea className="flex-1 p-4 pr-1" ref={scrollAreaRef}>
+      <Card className="flex-1 flex flex-col border-0 shadow-2xl overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950">
+        <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
           {messages.length === 0 ? (
-             <div className="flex flex-col items-center justify-center h-full text-center py-10">
-              <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
-              <p className="text-xl font-semibold">Hello! How can I help you today?</p>
-              <p className="text-muted-foreground">Type your question below to get started with StudyWise AI.</p>
-              <Image 
-                data-ai-hint="friendly robot chat"
-                src="https://picsum.photos/seed/chatempty/300/200" 
-                alt="Chatbot illustration" 
-                width={300} 
-                height={200} 
-                className="mt-6 rounded-lg opacity-75 shadow-md"
-              />
+             <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-full">
+                <MessageCircle className="h-12 w-12 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Hello! I'm your AI Study Assistant
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md">
+                Ask me anything about your studies. I can help with explanations, problem-solving, research, and more!
+              </p>
+              
+              {/* Example prompts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
+                {[
+                  "Explain photosynthesis in simple terms",
+                  "Help me solve this math problem",
+                  "What are the key points about World War II?",
+                  "How does machine learning work?"
+                ].map((prompt, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setInput(prompt)}
+                    className="p-3 text-left bg-gradient-to-r from-white to-purple-50 dark:from-slate-800 dark:to-purple-950 rounded-lg border border-purple-200 dark:border-purple-800 hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-950 dark:hover:to-pink-950 transition-all duration-300 text-sm"
+                  >
+                    <Sparkles className="w-4 h-4 inline mr-2 text-purple-500" />
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex items-end gap-3 mb-4 ${ // items-end for better bubble alignment
-                  msg.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {msg.role === 'assistant' && (
-                  <span className="flex-shrink-0 p-2 bg-primary/10 rounded-full self-start"> {/* self-start for icon alignment */}
-                    {msg.icon || <Bot className="h-5 w-5 text-primary" />}
-                  </span>
-                )}
+            <div className="space-y-6">
+              {messages.map((msg) => (
                 <div
-                  className={`max-w-[75%] lg:max-w-[70%] px-4 py-3 rounded-xl shadow-md break-words ${ // break-words
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-card border text-card-foreground rounded-bl-none'
+                  key={msg.id}
+                  className={`flex items-end gap-4 ${
+                    msg.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {msg.role === 'assistant' ? (
-                    <MarkdownRenderer content={msg.content} />
-                  ) : (
-                    <p className="whitespace-pre-wrap">{msg.content}</p> 
+                  {msg.role === 'assistant' && (
+                    <div className="flex-shrink-0 p-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-full">
+                      <Bot className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[75%] lg:max-w-[70%] px-6 py-4 rounded-2xl shadow-lg break-words ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-md'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <MarkdownRenderer content={msg.content} />
+                    ) : (
+                      <p className="whitespace-pre-wrap font-medium">{msg.content}</p> 
+                    )}
+                  </div>
+                   {msg.role === 'user' && (
+                    <div className="flex-shrink-0 p-3 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full">
+                       <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
                   )}
                 </div>
-                 {msg.role === 'user' && (
-                  <span className="flex-shrink-0 p-2 bg-secondary rounded-full self-start"> {/* self-start for icon alignment */}
-                     {msg.icon || <User className="h-5 w-5" />}
-                  </span>
-                )}
-              </div>
-            ))
+              ))}
+              
+              {/* Typing indicator */}
+              {isPending && (
+                <div className="flex items-end gap-4 justify-start">
+                  <div className="flex-shrink-0 p-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-full">
+                    <Bot className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="px-6 py-4 bg-white dark:bg-slate-800 rounded-2xl rounded-bl-md shadow-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">AI is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </ScrollArea>
-        <CardFooter className="p-4 border-t bg-background">
+        
+        <CardFooter className="p-6 border-t border-purple-200 dark:border-purple-800 bg-gradient-to-r from-white to-purple-50 dark:from-slate-900 dark:to-purple-950">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="w-full flex items-center gap-3"
+            className="w-full flex items-center gap-4"
           >
-            <Input
-              ref={inputRef}
-              type="text"
-              placeholder="Type your message to StudyWise AI..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isPending}
-              className="flex-1 text-base py-3" // Slightly larger text and padding
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-            />
-            <Button type="submit" size="lg" disabled={isPending || !input.trim()} className="px-5">
-              {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder="Ask me anything about your studies..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isPending}
+                className="w-full pl-4 pr-12 py-4 text-base bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl shadow-sm"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Zap className="h-4 w-4 text-purple-400" />
+              </div>
+            </div>
+            <Button 
+              type="submit" 
+              size="lg" 
+              disabled={isPending || !input.trim()} 
+              className="px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+            >
+              {isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
                <span className="sr-only">Send message</span>
             </Button>
           </form>

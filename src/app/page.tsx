@@ -111,7 +111,7 @@ export default function LandingPage() {
                   <Link href="/login">Login</Link>
                 </Button>
                 <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg" asChild>
-                  <Link href="/signup">Get Started</Link>
+                  <Link href="/signup">Sign Up</Link>
                 </Button>
               </div>
             ) : (
