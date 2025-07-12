@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Allow search engines to crawl the main pages
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /dashboard
+Allow: /features
+
+Sitemap: https://studywise.app/sitemap.xml

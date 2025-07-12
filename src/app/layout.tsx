@@ -16,8 +16,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'StudyWise - Your Academic Assistant',
-  description: 'A revolutionary academic assistant for college students, powered by AI.',
+  title: 'StudyWise - Your AI-Powered Academic Assistant',
+  description: 'Transform your learning with AI-powered note summarization, flashcard generation, homework help, and smart study tools. Built for modern students.',
+  keywords: ['study', 'AI', 'education', 'learning', 'notes', 'flashcards', 'homework', 'academic'],
+  authors: [{ name: 'StudyWise Team' }],
+  creator: 'StudyWise',
+  publisher: 'StudyWise',
+  robots: 'index, follow',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://studywise.app',
+    title: 'StudyWise - Your AI-Powered Academic Assistant',
+    description: 'Transform your learning with AI-powered study tools designed for modern students.',
+    siteName: 'StudyWise',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'StudyWise - Your AI-Powered Academic Assistant',
+    description: 'Transform your learning with AI-powered study tools designed for modern students.',
+    creator: '@studywise',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json',
 };
 
 const InitializeTheme = () => (

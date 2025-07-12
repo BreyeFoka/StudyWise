@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,25 +12,18 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import type { AuthError } from 'firebase/auth';
 import { Logo } from '@/components/logo';
+import { SignUpSchema, type SignUpFormData } from '@/lib/schemas/auth';
 
-export const SignUpSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(), // Made optional for now
-  email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-});
-// Add .refine(data => data.password === data.confirmPassword, { message: "Passwords don't match", path: ["confirmPassword"] })
-// if confirmPassword field is added.
-
-export default function SignUpPage() {
+function SignUpPageContent() {
   const { signUpWithEmail, user, loading: authLoading, isFirebaseReady, auth } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof SignUpSchema>>({
+  const form = useForm<SignUpFormData>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
       name: '',
@@ -47,7 +39,7 @@ export default function SignUpPage() {
   }, [user, authLoading, router]);
 
 
-  const onSubmit = async (values: z.infer<typeof SignUpSchema>) => {
+  const onSubmit = async (values: SignUpFormData) => {
     setIsSubmitting(true);
     if (!isFirebaseReady || !auth) { // Check if auth instance is available
       toast({
@@ -186,5 +178,17 @@ export default function SignUpPage() {
         </p>
       </CardFooter>
     </Card>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    }>
+      <SignUpPageContent />
+    </Suspense>
   );
 }

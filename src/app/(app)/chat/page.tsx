@@ -61,7 +61,7 @@ export default function ChatbotPage() {
 
     const chatHistoryForAI: AIChatMessage[] = messages.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model', // 'model' for assistant for Genkit
-      parts: [{ text: msg.content }],
+      content: [{ text: msg.content }],
     }));
 
     const aiInput: ContextualChatInput = {

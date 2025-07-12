@@ -1,21 +1,19 @@
 
 'use client';
 
-import type { User as FirebaseUser, AuthError } from 'firebase/auth';
+import type { User as FirebaseUser, AuthError, Auth } from 'firebase/auth';
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth as authInstance, firebaseInitializationError } from '@/lib/firebase/client'; // Renamed to authInstance
 import { isFirebaseConfigured } from '@/lib/firebase/config';
-import type { z } from 'zod';
-import type { LoginSchema } from '@/app/(auth)/login/page';
-import type { SignUpSchema } from '@/app/(auth)/signup/page';
+import type { LoginFormData, SignUpFormData } from '@/lib/schemas/auth';
 
 interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
-  signInWithEmail: (data: z.infer<typeof LoginSchema>) => Promise<FirebaseUser>;
-  signUpWithEmail: (data: z.infer<typeof SignUpSchema>, displayName?: string) => Promise<FirebaseUser>;
+  signInWithEmail: (data: LoginFormData) => Promise<FirebaseUser>;
+  signUpWithEmail: (data: SignUpFormData, displayName?: string) => Promise<FirebaseUser>;
   signOutUser: () => Promise<void>;
   isFirebaseReady: boolean; // True if config is present AND initialization was successful
   auth: Auth | undefined; // Expose the auth instance
@@ -58,13 +56,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  const signInWithEmail = async (data: z.infer<typeof LoginSchema>): Promise<FirebaseUser> => {
+  const signInWithEmail = async (data: LoginFormData): Promise<FirebaseUser> => {
     if (!isFirebaseReady || !authInstance) throw new Error("Firebase Auth is not available for sign in.");
     const userCredential = await signInWithEmailAndPassword(authInstance, data.email, data.password);
     return userCredential.user;
   };
 
-  const signUpWithEmail = async (data: z.infer<typeof SignUpSchema>, displayName?: string): Promise<FirebaseUser> => {
+  const signUpWithEmail = async (data: SignUpFormData, displayName?: string): Promise<FirebaseUser> => {
     if (!isFirebaseReady || !authInstance) throw new Error("Firebase Auth is not available for sign up.");
     const userCredential = await createUserWithEmailAndPassword(authInstance, data.email, data.password);
     if (displayName && userCredential.user) {

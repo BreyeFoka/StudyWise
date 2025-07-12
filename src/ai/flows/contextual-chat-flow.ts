@@ -9,12 +9,11 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
-import type { MessageData } from 'genkit'; 
+import { z } from 'genkit'; 
 
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'model']),
-  parts: z.array(z.object({ text: z.string() })),
+  content: z.array(z.object({ text: z.string() })),
 });
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
@@ -56,10 +55,19 @@ const contextualChatFlow = ai.defineFlow(
     outputSchema: ContextualChatOutputSchema,
   },
   async (input) => {
+    const messages = (input.chatHistory || []).map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+    
+    // Add the current message to the conversation
+    messages.push({
+      role: 'user' as const,
+      content: [{ text: input.currentMessage }]
+    });
+
     const llmResponse = await ai.generate({
-      // model: 'googleai/gemini-1.5-flash-latest', // Or use the default from genkit.ts
-      prompt: input.currentMessage,
-      history: (input.chatHistory || []) as MessageData[], // Cast to Genkit's MessageData type
+      messages,
       system: systemInstruction,
       // config: { temperature: 0.7 }, // Optional: Adjust creativity
     });
